@@ -1,0 +1,33 @@
+Zadania na egzamin z asd
+
+1. Masz dane 2 drzewa BST i masz napisać funkcję zwracającą BOOL czy te drzewa zawierają te same elementy (mogą być inaczej ułożone w drzewach).
+2. Napisać funkcję sortującą możliwie jak najszybciej listę jednokierunkową z wartownikiem.
+3. Opis programu bez implementacji. Masz dane n przedziałów domkniętych <ai, bi>. Opisz algorytm, który z tych n przedziałów wybierze k takich, że łączny przedział końcowy będący sumą wybranych przedziałów będzie jak najdłuższy i spójny. Poza tym opisz jego złożoność i udowodnij poprawność.
+
+metoda DFS, BFS, sortowanie topologiczne, spr czy graf jest dwukolorowalny, szukanie jakiejs najkrotszej sciezki, odwracanie krawedzi grafu, oprocz tego funkcja haszujaca - jakies proste zadanie z tego byly na cwiczeniach, operacje na listach jednokierunkowych, sortowanie takich list, skip lista, sortowanie tablic: heap sort, quick sort, merge sort, radix sort i sortowanie kubełkowe - te dwa ostatnie tylko byly omowione bez rozpisanie kodu
+a jeszcze z grafow bylo: algorytm Kruskala, Dijkstry
+
+No i drzewo BST !!
+
+wszystkie wazniejsze operacje sobie powtorz
+
+Algorytm wyszukiwania połowkowego i szukanie najwiekszego podciagu - to bylo na pierwszym zjescie jeszcze
+
+znaczy szukanie takiego podciagu, zeby jego suma byla najwieksza :P
+
+jeszcze takie sortowanie listy z przepinaniem wskaznikow bylo
+
+aha jeszcze 2 zadania z programowania dynamicznego
+
+i troche mowil na temat algorytmow zachlannych, ale warto je ogarnac bo zadanie bylo z tego na egzaminie
+
+
+DO NAUCZENIA SIĘ
+tablice
+listy (wartownik)
+dziel i zwyciezaj
+programowanie dynamiczne
+algorytmy zachłanne
+drzewo bst
+wyszukiwanie podciagu o najwiekszej sumie
+wyszukiwanie połowkowe/binarne
