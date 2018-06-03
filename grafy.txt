@@ -1,0 +1,323 @@
+REPRREZENTACJA GRAFÓW W PAMIĘCI KOMPUTERA
+
+Dany jest graf G=(V,E)
+V - zbiór wierzchołków
+E - zbiór krawędzi
+
+1) Macierz sąsiedztwa (macierz adjacencji)
+	Jest to macierz zerojedynkowa kwadratowa o rozmiarze |V|x|V|. O następującej definicji:
+			{	1, gdy istnieje krawędź z wierzchołka o numerze i do wierzchołka o numerze j
+	a(i,j)= {
+			{	0, gdy NIE istnieje krawędź z wierzchołka o numerze i do wierzchołka o numerze j
+
+	Reprezentacja nie jest dobra dla grafów rzadkich. Znajduje zastosowanie tam, gdzie bardzo dużo razy sprawdzamy istnienie krawędzi, gdyż sprawdzenie czy dana krawędź istnieje wymaga stałego czasu Θ(1)
+	
+2) Macierz incydencji
+	Jest to macierz określająca powiązania wierzchołków z krawędziami grafu. Macierz jest prostokątna o rozmiarze |V|x|E|. Definiujemy ją w następujący sposób:
+			{	-1, gdy wierzchołek o numerze i jest końcem krawędzi o numerze j
+	a(i,j)=	{	0, gdy wierzchołek nie zawiera się w krawędzi
+			{	1, gdy wierzchołek o numerze i jest początkiem krawędzi o numerze j
+			
+	Każdy wiersz macierzy reprezentuje wierzchołek, natomiast każda kolumna reprezentuje krawędź.
+	Reprezentacja grafu za pomocą macierzy incydencji ma taką przewagę, że jej koszt w pamięci to Θ(|V|*|E|). Może się to okazać lepsze od macierzy sąsiedztwa, kiedy |E| << |V|.
+
+	Kiedy graf jest nieskierowany upraszczamy definicję macierzy w następujący sposób:
+			{	1, gdy wierzchołek o numerze i zawiera się w krawędzi o numerze j
+	a(i,j)=	{
+			{	0, gdy wierzchołek o numerze i NIE zawiera się w krawędzi o numerze j
+			
+3) Listy sąsiedztwa
+	Jest to reprezentacja grafu przez wektor o rozmiarze |V| - indeks elementu wektora odpowiada numerowi wierzchołka. Elementy wektora wskazują na listy sąsiadów danego wierzchołka.
+	Zaletą tej reprezentacji jest oszczędność pamięci, jest szczególnie przydatna dla grafów rzadkich. Koszt reprezentacji grafu w pamięci to Θ(|V|+|E|).
+	
+PRZESZUKIWANIE GRAFÓW
+
+Przeszukiwanie grafu to sposób na systematyczne odwiedzanie wierzchołków grafów do których można dojść przez istniejące krawędzie. Przy DFS-ie definiujemy czasy przetworzenia wierzchołków.
+Wyróżniamy dwa podstawowe sposoby przeszukiwania grafów:
+1) DFS (ang. Depth-First Search, przeszukiwanie w głąb)
+	Lista kroków:
+	1) Przeszukiwanie rozpoczynamy w wybranym wierzchołku grafu, który oznacza jako odwiedzony. 
+	2) Przechodzimy po dostępnych krawędziach do jeszcze nieodwiedzonego wierzchołka.
+	3) Oznaczamy wierzchołek jako odwiedzamy i powtarzamy punkt 2) do momentu kiedy istnieją jeszcze nieodwiedzone wierzchołki.
+	4) Powracamy do poprzedniego wierzchołka i wykonujemy punkt 2)
+	5) Kończymy działanie kiedy nie możemy już nigdzie iść
+	
+	DFS można zaimplementować za pomocą rekurencji lub za pomocą własnego stosu.
+	
+	Implementacja rekurencyjna:
+		DFS(G,i)	// G - graf, i - startowy wierzchołek
+			visited[|G.V|] 	// globalna tablica boolowska z informacjami czy odwiedziliśmy już wierzchołek
+			time = 0		// globalna zmienna z czasem odwiedzania wierzchołków
+			
+			for j=1 to |G.V|
+				visited[j] = FALSE
+			DFS-VISIT(G,i)
+			
+		DFS-VISIT(G,i)
+			visited[i] = TRUE
+			
+			time += 1
+			G.V[i].start_time = time
+			
+			for każdy sąsiad v wierzchołka i
+				if !visited[v]
+					DFS-VISIT(G,v)
+					
+			time += 1
+			G.V[i].end_time = time
+			
+	Implementacja stosowa:
+		// istnieje globalna tablica visited[|G.V|] (wyfalsowana)
+		DFS(G,i)
+			push(i)
+			while !stack_empty()
+				v = pop()
+				visited[v] = TRUE
+				for każdy sąsiad w wierzchołka v
+					if !visited[w]
+						push(w)
+
+2) BFS (ang. Breadth-First Search, przeszukiwanie wszerz)
+	Jego implementacja różni się od DFS-a tym, że zamiast stosu - używamy kolejki. Wykorzystywany jest do obliczania najkrótszych ścieżek z jednym źródłem dla grafu nieważonego.
+	
+	Implementacja:
+		// istnieje globalna tablica visited[|G.V|] (wyfalsowana)
+		BFS(G,i)	// G - graf, i - startowy wierzchołek
+			put(i)
+			G.V[i].length = 0
+			while !queue_empty()
+				v = get()
+				visited[v] = TRUE
+				for każdy sąsiad w wierzchołka v
+					if !visited[w]
+						G.V[w].length = G.V[v].length + 1
+						put(w)
+			
+CYKL EULERA
+
+Cykl Eulera to to taki cykl w grafie, w którym przechodzimy przez każdą krawędź dokładnie jeden raz. Posiada go każdy graf eulerowski, czyli taki, że stopień każdego grafu musi być parzysty.
+Algorytm wyszukiwania cyklu Eulera wykorzystuje przeszukiwanie w głąb. Implementacja z wykorzystaniem rekurencji:
+	EULER(G)
+		init_queue()	// globalna kolejka
+		DFS-EULER(G,0)
+		wypisz zawartość kolejki
+		
+	DFS-EULER(G,i)
+		for każdy sąsiad w wierzchołka i
+			usuń krawędź pomiędzy "w" i "i"
+			DFS-EULER(G, w)
+		put(i)
+		
+SORTOWANIE TOPOLOGICZNE
+
+Wykonując algorytm DFS (przeszukiwanie w głąb) obliczamy czasy przetworzenia wierzchołków. Sortowaniu można poddać tzw. DAG (Directed Acyclic Graph), czyli acykliczny graf skierowany. Sortowanie topologiczne ustawia wierzchołki w linii prostej tak, że istnieją tylko krawędzie "z lewej do prawej".
+Implementacja:
+	// visited[|G.V|] - wyfalsowana, time = 0, istnieje kolejka Q
+	// wywołujemy dla dowolnego wierzchołka, np. SORT(G,0)
+	SORT(G,i)
+			visited[i] = TRUE
+			
+			time += 1
+			G.V[i].start_time = time
+			
+			for każdy sąsiad v wierzchołka i
+				if !visited[v]
+					SORT(G,v)
+					
+			time += 1
+			G.V[i].end_time = time
+			Q.put(i)
+	// rezultatem funckji jest uzupełniona kolejka z posortowanymi wierzchołkami
+	
+
+MINIMALNE DRZEWA ROZPINAJĄCE
+
+W tym problemie mamy dany graf i funkcję wagową w(i), która dla argumentu i będącego krawędzią zwraca jej wagę (np. koszta przejścia przez krawędź). Problemem jest tutaj znalezienie takiego drzewa w grafie, aby obejmował wszystkie wierzchołki i sumaryczny koszt krawędzi tego drzewa był możliwie najmniejszy.
+
+Istnieją dwa (obowiązujące) ZACHŁANNE algorytmy szukania minimalnego drzewa rozpinającego.
+
+ALGORYTM KRUSKALA
+	Korzysta ze zbiorów rozłącznych, jest algorytmem zachłannym.
+	W skrócie:
+	- tworzymy tyle zbiorów ile jest wierzchołków
+	- sortujemy krawędzie po wagach (niemalejąco)
+	- iterujemy po wszystkich krawędziach w kolejności posortowanej, łącząc zbiory
+	
+	Implementacja:
+	// do funkcji podajemy graf G oraz funkcję wagową w
+	MST-KRUSKAL(G,w)
+		A = ()
+		for każdy wierzchołek v w G.V
+			MAKE-SET(v)
+		posortuj krawędzie z G.E niemalejąco względem wag w
+		for każda krawędź (u,v) z G.E, w kolejności niemalejących wag
+			if FIND-SET(u) != FIND-SET(v)
+				A = A + {(u,v)}
+				UNION(u,v)
+		return A
+	
+ALGORYTM PRIMA
+	Wykorzystuje kolejkę priorytetową typu min, jest algorytmem zachłannym.
+	W skrócie:
+	- tworzymy kolejkę priorytetową z wierzchołkami, ustawiając ich klucze (minimalna odległość od sąsiadów) na nieskończoność (∞)
+	- klucz wierzchołka źródłowego ustawiamy na 0
+	- wykonujemy następne kroki dopóki nasza kolejka nie jest pusta
+	- pobieramy wierzchołek z kolejki, iterując po jego sąsiadach
+	- jeżeli sąsiad należy jeszcze do kolejki priorytetowej i waga krawędzi między nim a iterowanym wierzchołkiem jest mniejsza od klucza tego sąsiada to ustawiamy jego klucz na tą wagę
+	
+	// do funkcji podajemy graf G, funkcję wagową w oraz wierzchołek r, który będzie korzeniem naszego minimalnego drzewa rozpinającego
+	MST-PRIM(G,w,r)
+		for każdy u z G.V
+			u.key = ∞
+			v.π = NIL
+		r.key = 0
+		Q = G.V
+		while Q != ()
+			u = EXTRACT-MIN(Q)
+			for każdy z G.Adj[u]
+				if v należy do Q i w(u,v) < v.key
+					v.π = u
+					v.key = w(u,v)
+
+
+NAJKRÓTSZE ŚCIEŻKI W GRAFIE
+
+Sprawa oczywista, rozróżniamy dwie klasy problemów - najkrótsze ścieżki z jednym źródłem oraz najkrótsze ścieżki "każdy z każdym". Dany jest graf z funkcją wagową.
+
+NAJKRÓTSZE ŚCIEŻKI Z JEDNYM ŹRÓDŁEM
+
+RELAKSACJA KRAWĘDZI
+Dwa omawiane algorytmy - algorytm Bellmana-Forda oraz algorytm Dijkstry korzystają z relaksacji krawędzi. Relaksacja krawędzi polega na sprawdzeniu, czy przechodząc przez wierzchołek u, można znaleźć krótszą od dotychczas najkrótszej ścieżki do v, i jeśli taka możliwość istnieje, na zaktualizowaniu v.d oraz v.π.
+
+Implementacja:
+	RELAX(u,v,w)
+		if v.d > u.d + w(u,v)
+			v.d = u.d + w(u,v)
+			v.π = u
+
+ALGORYTM BELLMANA-FORDA
+
+Algorytm pozwala na rozwiązanie problemu najkrótszych ścieżek z jednego źródła w przypadku, w którym wagi na krawędziach mogą być ujemne. 
+Algorytm zwraca informację logiczną czy w grafie istnieje cykl o ujmnej wadze, który jest osiągalny ze źródła. Jeśli taki cykl istnieje to najkrótszych ścieżek w grafie G nie można obliczyć. Jeśli takiego cyklu nie ma, to algorytm oblicza najkrótsze ścieżki i ich wagi.
+Działa w czasie Θ(|V|*|E|)
+
+W skrócie:
+- ustawiamy odległość dla źródła na 0, pozostałe wierzchołki na ∞
+- relaksujemy wszystkie krawędzie |V|-1 razy
+- próbujemy relaksować wszystkie krawędzie jeszcze raz, jeżeli powiedzie się to chociaż raz to zwracamy FALSE, w przeciwnym wypadku TRUE
+Uwaga:
+- algorytm można uprościć wykonując relaksację |V| razy, pamietajac przy tym (przy każdym wykonaniu głównej pętli) czy została dokonana jakakolwiek relaksacja, po wyjściu z pętli zwracamy tą wartość logiczną
+
+Implementacja:
+	// funkcja inicjalizuje odległości od źródła
+	INITIALIZE-SINGLE-SOURCE(G,s)
+		for każdy wierzchołek v z G.V
+			v.d = ∞
+			v.π = NIL
+		s.d = 0
+		
+	// oblicza najkrótsze ścieżki ze źródła s, w to funkcja wagowa
+	BELLMAN-FORD(G,w,s)
+		INITIALIZE-SINGLE-SOURCE(G,s)
+		for i=1 to |G.V|-1
+			for każda krawędź (u,v) z G.E
+				RELAX(u,v,w)
+		for każda krawędź (u,v) z G.E
+			if v.d > u.d + w(u,v)
+				return FALSE
+		return TRUE
+	
+ALGORYTM DIJKSTRY
+
+Kolejny algorytm szukania najkrótszej ścieżki z jednym źródłem. Zakłada, że wszystkie krawędzie mają nieujemne wagi.
+Algorytm wykorzystuje kolejkę priorytetową. Jest to algorytm zachłanny
+
+W skrócie:
+- ustawiamy odległość dla źródła na 0, pozostałe wierzchołki na ∞
+- inicjalizujemy kolejkę priorytetową wierzchołkami, kluczami są odległości
+- powtarzamy następujące czynności, aż kolejka będzie pusta
+- pobieramy wierzchołek z kolejki
+- wykonujemy relaksację dla krawędzi wychodzących z tego wierzchołka
+- jeżeli uda się coś zrelaksować to wierzchołek z krańca krawędzi może się przesunąć w kolejce priorytetowej.
+
+Implementacja:
+	DIJKSTRA(G,w,s)
+		INITIALIZE-SINGLE-SOURCE(G,s)
+		S = ()
+		Q = G.V
+		while Q != ()
+			u = EXTRACT-MIN(Q)
+			S = S + {u}
+			for każdy wierzchołek v z G.Adj[u]
+				RELAX(u,v,w)
+			
+NAJKRÓTSZE ŚCIEŻKI KAŻDY Z KAŻDYM
+			
+ALGORYTM FLOYDA-WARSHALLA
+
+Algorytm Floyda-Warshalla pozwala na obliczenie najkrótszych ścieżek w grafie "każdy z każdym". Jest to algorytm programowania dynamicznego.
+Wynikiem algorytmu jest macierz o rozmiarzy |V|x|V|, w której są zapisane najkrótsze odległości miedzy parami wierzchołków. Algorytm wykazuje podobieństwo do mnożenia macierzy.
+
+W skrócie:
+- tworzymy macierz W o rozmiarze |V|x|V| wg następującej definicji:
+		{ 0, jeżeli i=j
+W(i,j)=	{ ∞, jeżeli i!=j i nie istnieje krawędź z i do j
+		{ w(i,j), jeżeli i!=j i istnieje krawędź z i do j
+- ustalamy wejściową macierz jako D(0) 
+- wykonujemy następujące kroki k=|V| razy (k zmienia się od 1 do |V|, czyli numery wierzchołków)
+- tworzymy nową macierz D(k) o rozmiarze |V|x|V|
+- iterujemy po całej macierzy D(k-1) tworząc poprawną macierz D(k)
+- ustawiamy D(k)(i,j) jako minimum z D(k-1)(i,j) i sumy D(k-1)(i,k)+D(k-1)(k,j)
+- po zakończeniu głównej pętli zwracamy macierz D(n)
+
+Implementacja:
+	FLOYD-WARSHALL(W)
+		n = W.rows
+		D(0) = W
+		for k=1 to n
+			niech D(k) = (d(k,ij)) będzie nową macierzą n x n
+			for i=1 to n
+				for j=1 to n
+					d(k,ij) = min(d(k-1,ij), d(k-1,ik) + d(k-1,kj))
+					
+		return D(n)
+		
+		
+PROBLEM MAKSYMALNEGO PRZEPŁYWU
+
+Dany jest graf skierowany G i dwa wyróżnione wierzchołki - źródło (s) oraz ujście (t).
+Dana jest funkcja c : V x V -> N, mówiąca ile jednostek substancji możemy przetransportować przez krawędź (u,v), jeżeli krawędź nie istnieje to c(u,v)=0
+Ze źródła istnieją tylko krawędzie wychodzące, a w ujściu nie istnieją krawędzie wychodzące. Istnieje ścieżka od źródła do ujścia. Nie istnieją dwuwierzchołkowe cykle.
+Zadaniem jest znalezienie funkcji przepływu (trasa, którą można przetransportować największą ilość substancji).
+
+Funkcja przepływu f: V x V -> N, dla każdej krawędzi (u,v) z E mówi ile substancji należy przetransportować z u do v aby osiągnąć maksymalny przepływ.
+Definiujemy przepustowość residualną:
+				{ c(u,v) - f(u,v)	gdy (u,v) należy do E
+	c_f(u,v) =	{ f(v,u)			gdy (v,u) należy do E
+				{ 0					w przeciwnym razie
+Definiujemy sieć residualną:
+	G_f=(V,E_f), gdzie 
+	E_f = {(u,v) należące do V x V, takie że c_f(u,v) > 0}				
+			
+Prezentowany jest algorytm Forda-Fulkersona rozwiązujący ten problem.
+
+W skrócie:
+- zerujemy funkcję przepływu dla wszystkich krawędzi z grafu G
+- tworzymy sieć residualna
+- powtarzamy następujące kroki do momentu aż w sieci residualnej nie istnieją żadne ścieżki z s to t
+- bierzemy dowolną ścieżkę powiększającą (czyli ścieżkę z s do t) z sieci residualnej
+- obliczamy najmniejszą wartość przepustowości residualnej na tej ścieżce
+- aktualizujemy funkcję przepływu, dodając do jej wartości na (u,v) obliczone minimum, jeżeli krawędź istnieje w oryginalnym grafie, w przeciwnym razie odejmujemy to minimum od krawedzi przeciwnej (v,u)
+- tworzymy nową sieć residualną
+
+Implementacja:
+	FORD-FULKERSON(G, s, t)
+		for każda krawędź (u,v) z G.E
+			f(u, v) = 0
+		while istnieje ścieżka p z s do t w sieci residualnej G_f
+			x = min{c_f(u,v) : (u,v) na ścieżce p}
+			for każda krawędź (u,v) na ścieżce p
+				if (u,v) należy do E
+					f(u,v) = f(u,v) + x
+				else
+					f(v,u) = f(v,u) - x

@@ -1,0 +1,146 @@
+lcs(a,b) = { lcs(a-1, b-1) + 1;             A[a] == B[b]
+           { max(lcs(a-1, b), lcs(a, b-1);  A[a] != B[b]
+           { 0;                             a < 0 v b < 0
+           
+int lcs(int A[][, int n, int B[], int m) {
+    int LCS[n+1][m+1];
+    for(int i=0; i ≤ n; i++) {
+        LCS[i][0] = 0;
+    }
+    for(int i=0; i ≤ m; i++) {
+        LCS[0][i] = 0;
+    }
+    for(int a=1; a ≤ n; a++) {
+        for(int b=1; b ≤ m; b++) {
+            if(A[a-1] == B[b-1]) {
+                LCS[a][b] = LCS[a-1][b-1];
+            }
+            else {
+                LCS[a][b] = max(LCS[a-1][b], LCS[a][b-1]);
+            }
+        }
+    }
+    return LCS[n][m];
+}
+/*
+najdłuższy rosnący podciąg?
+mamy ciąg w A
+- kopiujemy do B
+- sortujemy B
+- LCS z A i B
+koszt: nlogn (sortowanie) + n² (LCS)
+
+da się ten algorytm z n pamięci (czas dalej n^2)?
+
+mamy element x gdzieś w talbicy, sprawdzamy długość wszystkich podciągów kończących się na x: szukamy elementu mniejszego od x, który jest końcem najdłuższego podciągu do tej pory
+*/
+int lis(int T[], int n) {
+    int L[n];
+    L[0] = 1;
+    int len = 1;
+    for(int i = 1; i < n; i++) {
+        L[i] = 1;
+        for(int j=0; j < i; j++) {
+            if(T[i] > T[j] && L[j] ≥ L[i]) {
+                L[i] = L[j] + 1;
+                if(len < L[i]) {
+                    len = L[i];
+                }
+            }
+        }
+    }
+    return len;
+}
+/*
+jak czas nlogn???
+*/
+
+
+/*
+Mamy pomnożyć macierze A_1, A_2, A_3, ..., A_l-1, A_l, A_l+1, ..., A_n
+
+           20
+    60     []      100
+10[][][] 60[] 20[][][][]
+           []
+A×(B×C) - 20000 mnożeń
+(A×B)×C - 180 000 mnożeń
+
+Znajdź minimalny koszt mnożenia macierzy
+D - tablica wymiarów macierzy (rozmiaru n+1)
+
+       D[1]            D[2]
+     [][ ][][]        [][ ]
+D[0] []A_1[][]   D[1] []A_2 ...
+     [][ ][][]        [][ ]
+     
+// doskonałe na kolokwium bo jest odpowiednio trudne a wejście i wyjście jest łatwe (tablica intów -> int)
+
+wystarcza nam rozwiązanie n^3 (są szybsze ale trudne)
+
+przykładowy podproblem:
+A_1, A_2, A_3, ..., (A_l-1, A_l, A_l+1, ..., A_x), ..., A_n
+trzeba zapamiętać koszt podproblemu, bo jak nie to będzie 2^n
+
+C[i][j] - najmniejszy koszt wymnożenia macierzy od i do j
+
+jak rozbić i do j na mniejszy problem?
+(A_i, A_i+1, ..., )(A_k, ..., A_j-1, A_j) <- nawias w pozycji k
+
+C[i][j] = { min_(i < k ≤ j) C[i][k-1] + C[k][j] + D[i-1] ∙ D[k-1] ∙ D[j-1],    i < j // tu mogą być jakieś błędy z indeksami, w domu zaimplementować
+          { 0,                                                                 i = j
+          
+          
+C: na początku tak:
+                n
+        [ 0][+∞][+∞][+∞]
+      n [+∞][ 0][+∞][+∞]
+        [+∞][+∞][ 0][+∞]
+        [+∞][+∞][+∞][ 0]
+będzie n^3: bo wypełniamy tablicę n^2 za każdym razem jadąc od i do j
+*/
+
+
+
+
+/*
+mamy sobie graf:
+chcemy pokolorować wierzchołki tak, żeby z jednym kolorem nie miały wspólnej krawędzi
+rozwiązanie optymalne jest NP-zupełne
+pokoloruj minimalną liczną kolorów - NP-trudny
+
+algorytm, który koloruje graf ilością kolorów będącą pewną funkcją stopni wierzchołków - wymyślić funkcję i udowodnić że tyle
+
+
+bierzemy niepokolorowany wierzchołek z maksymalnym stopniem - koloruję go, wszystkie następne - pierwszym dostępnym kolorem
+dla wierzchołka o stopniu k trzeba sprawdzić maksymalnie k+1 kolorów
+czyli w całym grafie nie więcej niż χ+1 kolorów (χ - maksymalny stopień)
+*/
+
+
+/*
+wracamy do lis z nlogn
+?? coś z listami było niezrozumiałego
+
+zadania domowe:
+def pewnej tablicy która to zadanie trzaska:
+L[i] przechowuje najmniejszy ostatni element podciągu rosnącego o długości i
+biorę wszystkie podciągi rosnace o długości i
+biorę ich ostatnie elementy
+wybieram najmniejszy element
+i wrzucam go tu (L[i])
+zaczynamy od 0 do n+1
+zastanowić się jak aktualizować na bieżąco l żeby nie zburzyć definicji
+dodajemy kolejny element - trzeba zaktualizować tablicę tak żeby dalej była prawidłowa
+aktualizacja L musi być logn - wtedy algorytm jest nlogn
+
+
+drugie zadanie:
+na algorytm zachłanny - wymyślić, niekoniecznie dowodzić poprawności bo trudne
+mamy n zadań. Każde zadanie trwa 1 sekundę. Mamy jeden procesor który wykonuje zadania sekwencyjnie
+pierwsze zadanie wykonywane wykonuje się w czasie [0,1), drugie [1,2), trzecie [2,3) itd.
+Każde zadanie ma deadline - musi skończyć się przed czasem, np. 3 1/2 sekund.
+Jeżeli zadanie skończy się przed czasem to dostajemy nagrodę. Każde zadanie ma swoją.
+Jeżeli zadanie nie zostanie wykonane przed deadlinem to nie dostajemy nagrody ani kary.
+Celem jest takie poukładanie zadań, żeby zarobić jak najwięcej.
+Algorytm jest bardzo prosty, dowód trudny.

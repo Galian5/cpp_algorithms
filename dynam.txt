@@ -1,0 +1,211 @@
+PROGRAMOWANIE DYNAMICZNE
+
+Programowanie dynamiczne to sposób rozwiązywania problemów optymalizacyjnych przez odpowiednie złożenie rozwiązań podproblemów. W programowaniu dynamicznym korzysta się z tabelarycznych metod rozwiązywania problemów.
+Metoda przypomina nieco metodę "dziel i zwyciężaj".
+
+NAJDŁUŻSZY PODCIĄG ROSNĄCY
+
+Problem:
+	Dana jest tablica liczb, np. A=[2,-1,3,-2,5,7,11,1,2,13], indeksowana od 0 do n-1. Rozwiązaniem problemu jest długość najdłuższego podciągu rosnącego w tej tablicy. W tym przypadku jest to 6.
+
+Rozwiązanie:
+	Funkcję rekurencyjna opisująca problem:
+		f(k) - długość najdłuższego podciągu rosnącego kończącego się na A[k]
+				{ 1 	dla k=0
+		f(k) =	{
+				{ max { f(t)+1 : t < k && A[t] < A[k] }
+			
+	Implementacja:
+		LIS(A, n)
+			niech F[n] będzie nową tablicą
+			F[0] = 1
+			for i:=1 to n
+				F[i] = 1
+				for t:=0 to i-1
+					if A[t] < A[i] && F[t]+1 > F[i]
+						F[i] = F[t]+1
+						
+SUMA PODZBIORU
+
+Problem:
+	Dany jest tablica liczb, np. A=[1,5,3,5,4,12,8,1,2,6] i liczba T, np. T=17. Rozwiązaniem problemu jest znalezienie podzbioru A sumującego się do T. Tutaj rozwiązaniem problemu jest np. [5,4,8], czyli prawda.
+	
+Rozwiązanie:
+	Funkcja rekurencyjna opisująca problem:
+					{ T			jeśli zbiór od A[0] do A[i] zawiera podzbiór o sumie k
+		f(i,k) 	 = 	{
+					{ F 		w przeciwnym wypadku
+		f(i,0) 	 = T
+		f(i+1,k) = f(i,k) (or f(i,k-A[i+1] dla k>=A[i+1])
+		
+	Implementacja:
+		SUBSET-SUM(A,n,T)
+			niech F[T+1][n+1] będzie nową tablicą boolowską
+			for i:=0 to n
+				F[0][i] = TRUE
+			for i:=0 to T
+				F[i][0] = FALSE
+				
+			for i:=1 to T
+				for j:=1 to n
+					F[i][j] = F[i][j-1]
+					if i >= A[j-1]
+						F[i][j] = F[i][j] || F[i - A[j-1]][j-1]
+						
+PROBLEM PLECAKOWY
+
+Problem:
+	Dany jest plecak o pojemności W kg. Dane są przedmioty o masach w tablicy w[0..n-1] i ich ceny w tablicy c[0..n-1]. Zadaniem jest maksymalizacja wartości plecaka przez wrzucenie odpowiednich przedmiotów do niego.
+	Istnieją dwie klasy problemu pleckowego:
+		- problem plecakowy dyskretny - przedmiot możemy wziąć do plecaka albo go nie brać
+		- problem plecakowy ciągły - przedmioty możemy ciąć w dowolny sposób, wartość rozkłada się równomiernie na jednostkę masy
+	Problem dyskretny rozwiązujemy za pomocą programowania dynamicznego, natomiast problem ciągły algorytmem zachłannym.
+		
+Rozwiązanie problemu dyskretnego (gdy mamy nieskończenie wiele przedmiotów danego typu):
+	Funkcja rekurencyjna opisująca problem:
+		A(i) - największa możliwa wartość, którą można otrzymać przy założeniu wagi plecaka mniejszej bądź równej i. (A(W) jest rozwiązaniem problemu)
+		A(0) = 0
+		A(i) = max { c[j] + A(i-w[j]) : w[j] <= i}
+	
+	Implementacja:
+		// W - pojemność plecaka
+		KNAPSACK(W)
+			niech A[W+1] będzie nową tablicą
+			
+			for i=0 to W
+				A[i] = 0
+			
+			for i=0 to W
+				for j=0 to n-1
+					if w[j] <= i
+						A[i] = max(A[i], A[i-w[j]] + c[j])
+						
+Rozwiązanie problemu dyskretnego (gdy mamy tylko po jednym rodzaju przedmiotu):
+	Funkcja rekurencyjna opisująca problem:
+		A(i,j) - największa możliwa wartość, którą można otrzymać przy założeniu wagi mniejszej bądź równej j i wykorzystaniu pierwszych i elementów. (A(n,W) jest rozwiązaniem problemu)
+		A(0,j)=0
+		A(i,0)=0
+		A(i,j)=A(i-1,j) jeśli w[i] > j
+		A(i,j)=max(A(i-1, j), c[i] + A(i-1, j-w(i))) jeśli w[i] <= j
+		
+	Implementacja:
+		// n - liczba przedmiotów, W - pojemność plecaka
+		KNAPSACK(n, W)
+			niech A[n+1][W+1] będzie nową tablicą
+			
+			for i=0 to n
+				A[i][0] = 0
+			for i=0 to W
+				A[0][j] = 0
+				
+			for i=1 to n
+				for j=0 to W
+					if w[i] > j
+						A[i][j] = A[i-1][j]
+					else
+						A[i][j] = max(A[i-1][j], A[i-1][j-w[i-1]] + c[i-1])
+
+NAJWIĘKSZY WSPÓLNY PODCIĄG
+
+Problem:
+	Dane są dwie tablice ze znakami X[1..m] oraz Y[1..n]. Poszukiwany jest rozmiar najdłuższego wspólnego podciągu, niekoniecznie ciągłego.
+	
+Rozwiązanie:
+	Funkcja rekurencyjna:
+		C[i,j] - długość najdłuższego wspólnego podciągu z wykorzystaniem i pierwszych znaków X oraz j pierwszych znaków Y
+					{ 0					dla i=0 lub j=0
+		C[i,j] =	{ C[i-1,j-1] + 1	dla i,j>0 oraz X[i]==Y[j]
+					{ max(C[i,j-1], C[i-1,j])	dla i,j>0 oraz X[i]!=Y[j]
+		C[m,n] to rozwiązanie problemu
+		
+	Implementacja:
+		LCS-LENGTH(X,Y)
+			m = X.length
+			n = Y.length
+			niech B[1..m][1..n] i C[0..m][0..n] będą nowymi tablicami	// w tablicy B zapamiętujemy które znaki tworzą największy wspólny podciąg
+			
+			for i=1 to m
+				c[i,0] = 0
+			for i=0 to n
+				c[0,i] = 0
+			
+			for i=1 to m
+				for j=1 to n
+					if X[i] == Y[j]
+						C[i,j] = C[i-1][j-1] +1
+						B[i,j] = "←↑"	// taki znak oznacza wykorzystanie znaków X[i] i Y[j]
+					else if C[i-1,j] >= C[i,j-1]
+						C[i,j] = C[i-1,j]
+						B[i,j] = "↑"
+					else
+						C[i,j] = C[i,j-1]
+						B[i,j] = "←"
+						
+NAWIASOWANIE MACIERZY
+
+Problem:
+	Dany jest ciąg macierzy, znaleźć nawiasowanie tych macierzy tak aby liczba mnożeń skalarnych była jak najmniejsza.
+
+Rozwiązanie:
+	Implementacja:
+		// p to tablica z liczbą wierzy i-tej macierzy (=liczbie kolumn (i+1)-szej macierzy)
+		MEMOIZED-MATRIX-CHAIN(p)
+			n = p.length -1
+			niech m[1..n][1..n] będzie nową tablicą
+			for i=1 to n
+				for j=i to n
+					m[i][j] = ∞
+			return LOOKUP-CHAIN(m,p,1,n)
+			
+		LOOKUP-CHAIN(m,p,i,j)
+			if m[i][j] < ∞
+				return m[i][j]
+			if i == j
+				return 0
+			for k=i to j-1
+				q = LOOKUP-CHAIN(m,p,i,k) + LOOKUP-CHAIN(m,p,k+1,j) + p[i-1]*p[k]*p[j]
+				if q < m[i][j]
+					m[i][j] = q
+					
+			return m[i,j]
+			
+			
+ALGORYTMY ZACHŁANNE
+
+Algorytmy zachłanne rozwiązują problem optymalizacyjny podejmując na każdym kroku decyzję lokalnie najlepszą. Niejednokrotnie upraszczają algorytmy dynamiczne.
+
+CIĄGŁY PROBLEM PLECAKOWY
+
+Problem:
+	Problem zdefiniowany jest jak poprzednio ale możemy "kroić" przedmioty
+
+Rozwiązanie:
+	Lista kroków:
+		1) Obliczyć stosunek wartości każdego przedmiotu do jego masy
+		2) Posortować przedmioty nierosnąco według tego stosunku
+		3) Powtarzać następujący krok do momentu kiedy będziemy mieć pełny plecak
+		4) Bierzemy maksymalną ilość przedmiotu (plecak też nas ogranicza) o największym stosunku wartość/waga
+		
+PROBLEM WYBORU ZAJĘĆ
+
+Problem:
+	Mamy do wyboru N zajęć które mają pewny czas rozpoczęcia i czas zakończenia. Mamy do dyspozycji pewną salę zarezerowaną na pewien przedział czasu. Problemem jest zmaksymalizowanie liczby zajęć w tym czasie.
+
+Rozwiązanie:
+	Lista kroków:
+		1) Sortujemy zajęcia niemalejąco po czasie zakończenia danego zajęcia.
+		2) Powtarzamy następujące kroki do momentu aż nie będziemy mieć już żadnych zajęć.
+		3) Wybieramy zajęcie które kończą się najwcześniej
+		4) Usuwamy z listy zajęć, te które kolidują z wybranymi zajęciami
+		
+KODY HUFFMANA
+
+Problem:
+	Jedna z najprostszych i łatwych w implementacji metod kompresji bezstratnej. Dany jest pewny alfabet i pewien tekst korzystający z tego alfabetu. Litery tego alfabetu mają pewne prawdopodobieństwo wystąpienia. Problemem jest przypisanie literom alfabetu pewnych sekwencji bitów tak aby zaszyfrowany tekst był możliwie najmniejszy. 
+
+Rozwiązanie:
+	Lista kroków:
+		1) Tworzymy kolejkę priorytetową (typu MIN) z literami alfabetu, kluczem każdej liter jest jest liczba wystąpienia (prawd. pojawienia się tej litery w tekście). 
+		2) Będziemy tworzyć drzewo binarne. W liściach mamy literki alfabetu. Kod literki to sekwencja bitów na ścieżce od korzenia drzewa do danego liścia. Idąc po drzewie w lewo mamy bit 0, idąc po korzeniu w prawo mamy bit 1.
+		3) Pobieramy z kolejki dwie litery i łaczymy je wspólnym węzłem, ustalając klucz na sumę wystąpień obu liter i dodając do kolejki priorytetowej
+		4) Powtarzamy punkt 3) aż w kolejce priorytetowej zostanie jeden element
